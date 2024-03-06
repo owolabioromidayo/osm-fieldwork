@@ -28,6 +28,7 @@ import sys
 import threading
 from pathlib import Path
 from typing import Union
+from io import BytesIO
 
 import geojson
 import mercantile
@@ -125,7 +126,7 @@ class BaseMapper(object):
 
     def __init__(
         self,
-        boundary: str,
+        boundary: str | BytesIO,
         base: str,
         source: str,
         xy: bool,
@@ -133,7 +134,7 @@ class BaseMapper(object):
         """Create an tile basemap for ODK Collect.
 
         Args:
-            boundary (str): A BBOX string or GeoJSON file of the AOI.
+            boundary (str | BytesIO ): A BBOX string or loaded GeoJSON file of the AOI.
                 The GeoJSON can contain multiple geometries.
             base (str): The base directory to cache map tile in
             source (str): The upstream data source for map tiles
@@ -272,18 +273,18 @@ class BaseMapper(object):
 
     def makeBbox(
         self,
-        boundary: str,
+        boundary: str | BytesIO,
     ):
         """Make a bounding box from a shapely geometry.
 
         Args:
-            boundary (str): A BBOX string or GeoJSON file of the AOI.
+            boundary (str | BytesIO ): A BBOX string or loaded GeoJSON file of the AOI.
                 The GeoJSON can contain multiple geometries.
 
         Returns:
             (list): The bounding box coordinates
         """
-        if not boundary.lower().endswith((".json", ".geojson")):
+        if not isinstance(boundary, BytesIO) and not boundary.lower().endswith((".json", ".geojson")):
             # Is BBOX string
             try:
                 bbox_parts = boundary.split(",")
@@ -300,8 +301,13 @@ class BaseMapper(object):
                 return
 
         log.debug(f"Reading geojson file: {boundary}")
-        with open(boundary, "r") as f:
-            poly = geojson.load(f)
+        poly = None
+        #If boundary given is BytesIO object
+        if isinstance(boundary, BytesIO):
+            poly = geojson.load(boundary)
+        else:
+            with open(boundary, "r") as f:
+                poly = geojson.load(f)
         if "features" in poly:
             geometry = shape(poly["features"][0]["geometry"])
         elif "geometry" in poly:

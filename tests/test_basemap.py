@@ -23,6 +23,9 @@ import logging
 import os
 import shutil
 
+from io import BytesIO
+from osm_fieldwork.basemapper import create_basemap_file
+
 from osm_fieldwork.basemapper import BaseMapper
 from osm_fieldwork.sqlite import DataFile
 
@@ -65,6 +68,21 @@ def test_create():
 
     assert hits == 2
 
+def test_bytesio_boundary():
+    """Test creating a basemap file using BytesIO boundary object."""
+    boundary_bytesio = None
+    with open(boundary, "rb") as f:
+        boundary_bytesio = BytesIO(f.read())
+
+    create_basemap_file(
+        verbose=True,
+        boundary=boundary_bytesio,
+        outfile="outreachy.mbtiles",
+        zooms="12-15",
+        source="esri",
+    )
+
 
 if __name__ == "__main__":
     test_create()
+    test_bytesio_boundary()
