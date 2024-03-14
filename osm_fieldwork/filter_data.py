@@ -71,8 +71,8 @@ class FilterData(object):
         """
         if config:
             self.qc = config
-        excel_object = pd.ExcelFile(filespec)
-        entries = excel_object.parse(sheet_name=[0, 1, 2], index_col=0, usercols=[0, 1, 2])
+        # excel_object = pd.ExcelFile(filespec)
+        # entries = excel_object.parse(sheet_name=[0, 1, 2], index_col=0, usercols=[0, 1, 2])
         entries = pd.read_excel(filespec, sheet_name=[0, 1, 2])
         title = entries[2]["form_title"].to_list()[0]
         extract = ""
@@ -82,6 +82,7 @@ class FilterData(object):
             if entry[:20] == "select_one_from_file":
                 extract = entry[21:]
                 log.info(f'Got data extract filename: "{extract}", title: "{title}"')
+                break
             else:
                 extract = "none"
         total = len(entries[1]["list_name"])
@@ -139,8 +140,9 @@ class FilterData(object):
         """
         log.debug("Cleaning data...")
         if type(data) == str:
-            outfile = open(f"new-{data}", "x")
-            infile = open(tmpfile, "r")
+            path, fname = os.path.split(data)
+            outfile = open(f"{path}/new-{fname}", "x")
+            infile = open(data, "r")
             indata = geojson.load(infile)
         elif type(data) == bytes:
             indata = eval(data.decode())
