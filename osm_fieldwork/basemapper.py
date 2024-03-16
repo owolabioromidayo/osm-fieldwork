@@ -559,9 +559,16 @@ def main():
         parser.print_help()
         quit()
 
+    boundary_bytesio = None
+    try:
+        with open(args.boundary, "rb") as f:
+            boundary_bytesio = BytesIO(f.read())
+    except FileNotFoundError:
+        log.error("Boundary file could not be loaded!")
+
     create_basemap_file(
         verbose=args.verbose,
-        boundary=args.boundary,
+        boundary=boundary_bytesio,
         tms=args.tms,
         xy=args.xy,
         outfile=args.outfile,

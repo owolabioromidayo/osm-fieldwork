@@ -35,6 +35,8 @@ rootdir = os.path.dirname(os.path.abspath(__file__))
 boundary = f"{rootdir}/testdata/Rollinsville.geojson"
 outfile = f"{rootdir}/testdata/rollinsville.mbtiles"
 base = "./tiles"
+
+bbox_string = "-105.508741, 39.915714, -105.499229, 39.920574" #gotten from Rollinsville.gejson
 # boundary = open(infile, "r")
 # poly = geojson.load(boundary)
 # if "features" in poly:
@@ -45,7 +47,7 @@ base = "./tiles"
 #    geometry = shape(poly)
 
 
-def test_create():
+def test_create_with_boundary_path():
     """See if the file got loaded."""
     hits = 0
     basemap = BaseMapper(boundary, base, "topo", False)
@@ -68,8 +70,40 @@ def test_create():
 
     assert hits == 2
 
-def test_bytesio_boundary():
+
+def test_create_with_boundary_bytesio():
     """Test creating a basemap file using BytesIO boundary object."""
+    boundary_bytesio = None
+    with open(boundary, "rb") as f:
+        boundary_bytesio = BytesIO(f.read())
+
+    hits = 0
+    basemap = BaseMapper(boundary_bytesio, base, "topo", False)
+    with open(f"{rootdir}/testdata/temp_bbox_str", "w") as f:
+        f.write(str(basemap.bbox))
+
+    tiles = list()
+    for level in [8, 9, 10, 11, 12]:
+        basemap.getTiles(level)
+        tiles += basemap.tiles
+
+    if len(tiles) == 5:
+        hits += 1
+
+    if tiles[0].x == 52 and tiles[1].y == 193 and tiles[2].x == 211:
+        hits += 1
+
+    outf = DataFile(outfile, basemap.getFormat())
+    outf.writeTiles(tiles, base)
+
+    os.remove(outfile)
+    shutil.rmtree(base)
+
+    assert hits == 2
+
+
+def test_create_basemap_file():
+    """Test the create_basemap_file function"""
     boundary_bytesio = None
     with open(boundary, "rb") as f:
         boundary_bytesio = BytesIO(f.read())
@@ -83,6 +117,32 @@ def test_bytesio_boundary():
     )
 
 
+def test_create_with_bbox_string():
+    """Create a basemapper object using a bbox string"""
+    hits = 0
+    basemap = BaseMapper(bbox_string, base, "topo", False)
+    tiles = list()
+    for level in [8, 9, 10, 11, 12]:
+        basemap.getTiles(level)
+        tiles += basemap.tiles
+
+    if len(tiles) == 5:
+        hits += 1
+
+    if tiles[0].x == 52 and tiles[1].y == 193 and tiles[2].x == 211:
+        hits += 1
+
+    outf = DataFile(outfile, basemap.getFormat())
+    outf.writeTiles(tiles, base)
+
+    os.remove(outfile)
+    shutil.rmtree(base)
+
+    assert hits == 2
+
+
 if __name__ == "__main__":
-    test_create()
-    test_bytesio_boundary()
+    test_create_with_boundary_path()
+    test_create_basemap_file()
+    test_create_with_boundary_bytesio()
+    test_create_with_bbox_string()
