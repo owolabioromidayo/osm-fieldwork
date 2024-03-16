@@ -134,7 +134,7 @@ class BaseMapper(object):
         """Create an tile basemap for ODK Collect.
 
         Args:
-            boundary (str | BytesIO ): A BBOX string or (loaded) GeoJSON file of the AOI.
+            boundary (str | BytesIO ): A BBOX string or BytesIO-loaded GeoJSON file of the AOI.
                 The GeoJSON can contain multiple geometries.
             base (str): The base directory to cache map tile in
             source (str): The upstream data source for map tiles
@@ -278,7 +278,7 @@ class BaseMapper(object):
         """Make a bounding box from a shapely geometry.
 
         Args:
-            boundary (str | BytesIO ): A BBOX string or loaded GeoJSON file of the AOI.
+            boundary (str | BytesIO ): A BBOX string or BytesIO-loaded GeoJSON file of the AOI.
                 The GeoJSON can contain multiple geometries.
 
         Returns:
@@ -420,7 +420,7 @@ def create_basemap_file(
 
     Args:
         verbose (bool, optional): Enable verbose output if True.
-        boundary (str | None | BytesIO): The boundary for the area you want.
+        boundary (str | BytesIO | None): The boundary for the area you want.
         tms (str, optional): Custom TMS URL.
         xy (bool, optional): Swap the X & Y coordinates when using a
             custom TMS if True.
