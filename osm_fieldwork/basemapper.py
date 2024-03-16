@@ -420,7 +420,7 @@ def create_basemap_file(
 
     Args:
         verbose (bool, optional): Enable verbose output if True.
-        boundary (str, optional): The boundary for the area you want.
+        boundary (str | None | BytesIO): The boundary for the area you want.
         tms (str, optional): Custom TMS URL.
         xy (bool, optional): Swap the X & Y coordinates when using a
             custom TMS if True.

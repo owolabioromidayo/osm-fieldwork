@@ -48,7 +48,7 @@ bbox_string = "-105.508741, 39.915714, -105.499229, 39.920574" #gotten from Roll
 
 
 def test_create_with_boundary_path():
-    """See if the file got loaded."""
+    """Test that Basemapper object initializes with boundary path."""
     hits = 0
     basemap = BaseMapper(boundary, base, "topo", False)
     tiles = list()
@@ -79,8 +79,6 @@ def test_create_with_boundary_bytesio():
 
     hits = 0
     basemap = BaseMapper(boundary_bytesio, base, "topo", False)
-    with open(f"{rootdir}/testdata/temp_bbox_str", "w") as f:
-        f.write(str(basemap.bbox))
 
     tiles = list()
     for level in [8, 9, 10, 11, 12]:
@@ -102,8 +100,8 @@ def test_create_with_boundary_bytesio():
     assert hits == 2
 
 
-def test_create_basemap_file():
-    """Test the create_basemap_file function"""
+def test_create_basemap_file_with_bytesio():
+    """Test the create_basemap_file function using a BytesIO boundary object."""
     boundary_bytesio = None
     with open(boundary, "rb") as f:
         boundary_bytesio = BytesIO(f.read())
@@ -143,6 +141,6 @@ def test_create_with_bbox_string():
 
 if __name__ == "__main__":
     test_create_with_boundary_path()
-    test_create_basemap_file()
+    test_create_basemap_file_with_bytesio()
     test_create_with_boundary_bytesio()
     test_create_with_bbox_string()
