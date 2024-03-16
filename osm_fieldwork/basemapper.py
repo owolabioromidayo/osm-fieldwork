@@ -26,9 +26,9 @@ import queue
 import re
 import sys
 import threading
+from io import BytesIO
 from pathlib import Path
 from typing import Union
-from io import BytesIO
 
 import geojson
 import mercantile
@@ -302,7 +302,7 @@ class BaseMapper(object):
 
         log.debug(f"Reading geojson file: {boundary}")
         poly = None
-        #If boundary given is BytesIO object
+        # If boundary given is BytesIO object
         if isinstance(boundary, BytesIO):
             poly = geojson.load(boundary)
         else:
