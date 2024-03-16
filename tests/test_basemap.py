@@ -47,29 +47,15 @@ bbox_string = "-105.508741, 39.915714, -105.499229, 39.920574" #gotten from Roll
 #    geometry = shape(poly)
 
 
-def test_create_with_boundary_path():
-    """Test that Basemapper object initializes with boundary path."""
-    hits = 0
-    basemap = BaseMapper(boundary, base, "topo", False)
-    tiles = list()
-    for level in [8, 9, 10, 11, 12]:
-        basemap.getTiles(level)
-        tiles += basemap.tiles
-
-    if len(tiles) == 5:
-        hits += 1
-
-    if tiles[0].x == 52 and tiles[1].y == 193 and tiles[2].x == 211:
-        hits += 1
-
-    outf = DataFile(outfile, basemap.getFormat())
-    outf.writeTiles(tiles, base)
-
-    os.remove(outfile)
-    shutil.rmtree(base)
-
-    assert hits == 2
-
+def test_fails_with_boundary_path():
+    """Test that Basemapper object fails with boundary path initialization."""
+    res = False
+    try:
+        _ = BaseMapper(boundary, base, "topo", False)
+    except ValueError:
+         res = True
+    
+    assert res == True
 
 def test_create_with_boundary_bytesio():
     """Test creating a basemap file using BytesIO boundary object."""

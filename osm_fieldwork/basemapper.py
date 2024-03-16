@@ -278,7 +278,7 @@ class BaseMapper(object):
         """Make a bounding box from a shapely geometry.
 
         Args:
-            boundary (str | BytesIO ): A BBOX string or (loaded) GeoJSON file of the AOI.
+            boundary (str | BytesIO ): A BBOX string or loaded GeoJSON file of the AOI.
                 The GeoJSON can contain multiple geometries.
 
         Returns:
@@ -306,8 +306,8 @@ class BaseMapper(object):
         if isinstance(boundary, BytesIO):
             poly = geojson.load(boundary)
         else:
-            with open(boundary, "r") as f:
-                poly = geojson.load(f)
+            raise ValueError("Only BBOX string or BytesIO-loaded GeoJSON file are allowed")
+
         if "features" in poly:
             geometry = shape(poly["features"][0]["geometry"])
         elif "geometry" in poly:
@@ -472,7 +472,7 @@ def create_basemap_file(
 
     # Make a bounding box from the boundary file
     if not boundary:
-        err = "You need to specify a boundary! (file or bbox)"
+        err = "You need to specify a boundary! (BytesIO object or bbox)"
         log.error(err)
         raise ValueError(err)
 
@@ -565,6 +565,7 @@ def main():
             boundary_bytesio = BytesIO(f.read())
     except FileNotFoundError:
         log.error("Boundary file could not be loaded!")
+        quit()
 
     create_basemap_file(
         verbose=args.verbose,
