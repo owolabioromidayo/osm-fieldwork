@@ -126,7 +126,7 @@ def test_create_with_bbox_string():
 
 
 if __name__ == "__main__":
-    test_create_with_boundary_path()
+    test_fails_with_boundary_path()
     test_create_basemap_file_with_bytesio()
     test_create_with_boundary_bytesio()
     test_create_with_bbox_string()
