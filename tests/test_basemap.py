@@ -22,11 +22,9 @@
 import logging
 import os
 import shutil
-
 from io import BytesIO
-from osm_fieldwork.basemapper import create_basemap_file
 
-from osm_fieldwork.basemapper import BaseMapper
+from osm_fieldwork.basemapper import BaseMapper, create_basemap_file
 from osm_fieldwork.sqlite import DataFile
 
 log = logging.getLogger(__name__)
@@ -36,7 +34,7 @@ boundary = f"{rootdir}/testdata/Rollinsville.geojson"
 outfile = f"{rootdir}/testdata/rollinsville.mbtiles"
 base = "./tiles"
 
-bbox_string = "-105.508741, 39.915714, -105.499229, 39.920574" #gotten from Rollinsville.gejson
+bbox_string = "-105.508741, 39.915714, -105.499229, 39.920574"  # gotten from Rollinsville.gejson
 # boundary = open(infile, "r")
 # poly = geojson.load(boundary)
 # if "features" in poly:
@@ -101,7 +99,7 @@ def test_create_with_bbox_string():
 
 
 def test_create_basemap_file_with_bytesio():
-    """test the create_basemap_file function using a bytesio boundary object."""
+    """Test the create_basemap_file function using a bytesio boundary object."""
     boundary_bytesio = None
     with open(boundary, "rb") as f:
         boundary_bytesio = BytesIO(f.read())
@@ -116,8 +114,7 @@ def test_create_basemap_file_with_bytesio():
 
 
 def test_create_basemap_file_with_bbox_string():
-    """test the create_basemap_file function using a bbox string."""
-
+    """Test the create_basemap_file function using a bbox string."""
     create_basemap_file(
         verbose=True,
         boundary=bbox_string,
@@ -138,15 +135,15 @@ def test_fails_with_boundary_path():
             zooms="12-15",
             source="esri",
         )
-    except Exception as e: 
-         res = True
-    
+    except Exception:
+        res = True
+
     assert res
+
 
 if __name__ == "__main__":
     test_create_with_boundary_bytesio()
     test_create_with_bbox_string()
     test_create_basemap_file_with_bytesio()
     test_create_basemap_file_with_bbox_string()
-
     test_fails_with_boundary_path()

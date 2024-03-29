@@ -22,9 +22,9 @@
 import argparse
 import concurrent.futures
 import logging
+import os
 import queue
 import re
-import os
 import sys
 import threading
 from io import BytesIO
@@ -560,11 +560,11 @@ def main():
         quit()
 
     if os.path.isfile(args.boundary):
-            with open(args.boundary, 'rb') as f:
-                boundary = BytesIO(f.read())
+        with open(args.boundary, "rb") as f:
+            boundary = BytesIO(f.read())
     else:
         log.info("Could not load boundary as file. Loading as string")
-        boundary = args.boundary # is bbox string        
+        boundary = args.boundary  # is bbox string
 
     create_basemap_file(
         verbose=args.verbose,
