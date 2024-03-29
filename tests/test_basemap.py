@@ -22,8 +22,9 @@
 import logging
 import os
 import shutil
+from io import BytesIO
 
-from osm_fieldwork.basemapper import BaseMapper
+from osm_fieldwork.basemapper import BaseMapper, create_basemap_file
 from osm_fieldwork.sqlite import DataFile
 
 log = logging.getLogger(__name__)
@@ -32,6 +33,8 @@ rootdir = os.path.dirname(os.path.abspath(__file__))
 boundary = f"{rootdir}/testdata/Rollinsville.geojson"
 outfile = f"{rootdir}/testdata/rollinsville.mbtiles"
 base = "./tiles"
+
+bbox_string = "-105.508741, 39.915714, -105.499229, 39.920574"  # gotten from Rollinsville.gejson
 # boundary = open(infile, "r")
 # poly = geojson.load(boundary)
 # if "features" in poly:
@@ -42,10 +45,15 @@ base = "./tiles"
 #    geometry = shape(poly)
 
 
-def test_create():
-    """See if the file got loaded."""
+def test_create_with_boundary_bytesio():
+    """Test creating a basemap file using BytesIO boundary object."""
+    boundary_bytesio = None
+    with open(boundary, "rb") as f:
+        boundary_bytesio = BytesIO(f.read())
+
     hits = 0
-    basemap = BaseMapper(boundary, base, "topo", False)
+    basemap = BaseMapper(boundary_bytesio, base, "topo", False)
+
     tiles = list()
     for level in [8, 9, 10, 11, 12]:
         basemap.getTiles(level)
@@ -66,5 +74,76 @@ def test_create():
     assert hits == 2
 
 
+def test_create_with_bbox_string():
+    """Create a basemapper object using a bbox string"""
+    hits = 0
+    basemap = BaseMapper(bbox_string, base, "topo", False)
+    tiles = list()
+    for level in [8, 9, 10, 11, 12]:
+        basemap.getTiles(level)
+        tiles += basemap.tiles
+
+    if len(tiles) == 5:
+        hits += 1
+
+    if tiles[0].x == 52 and tiles[1].y == 193 and tiles[2].x == 211:
+        hits += 1
+
+    outf = DataFile(outfile, basemap.getFormat())
+    outf.writeTiles(tiles, base)
+
+    os.remove(outfile)
+    shutil.rmtree(base)
+
+    assert hits == 2
+
+
+def test_create_basemap_file_with_bytesio():
+    """Test the create_basemap_file function using a bytesio boundary object."""
+    boundary_bytesio = None
+    with open(boundary, "rb") as f:
+        boundary_bytesio = BytesIO(f.read())
+
+    create_basemap_file(
+        verbose=True,
+        boundary=boundary_bytesio,
+        outfile=outfile,
+        zooms="12-15",
+        source="esri",
+    )
+
+
+def test_create_basemap_file_with_bbox_string():
+    """Test the create_basemap_file function using a bbox string."""
+    create_basemap_file(
+        verbose=True,
+        boundary=bbox_string,
+        outfile=outfile,
+        zooms="12-15",
+        source="esri",
+    )
+
+
+def test_fails_with_boundary_path():
+    """Test that create_basemap_file object fails with boundary path initialization."""
+    res = False
+    try:
+        create_basemap_file(
+            verbose=True,
+            boundary=boundary,
+            outfile=outfile,
+            zooms="12-15",
+            source="esri",
+        )
+    except Exception:
+        res = True
+
+    assert res
+
+
 if __name__ == "__main__":
-    test_create()
+    test_create_with_boundary_bytesio()
+    test_create_with_bbox_string()
+    test_create_basemap_file_with_bytesio()
+    test_create_basemap_file_with_bbox_string()
+    test_fails_with_boundary_path()
