@@ -47,16 +47,6 @@ bbox_string = "-105.508741, 39.915714, -105.499229, 39.920574" #gotten from Roll
 #    geometry = shape(poly)
 
 
-def test_fails_with_boundary_path():
-    """Test that Basemapper object fails with boundary path initialization."""
-    res = False
-    try:
-        _ = BaseMapper(boundary, base, "topo", False)
-    except ValueError:
-         res = True
-    
-    assert res == True
-
 def test_create_with_boundary_bytesio():
     """Test creating a basemap file using BytesIO boundary object."""
     boundary_bytesio = None
@@ -86,21 +76,6 @@ def test_create_with_boundary_bytesio():
     assert hits == 2
 
 
-def test_create_basemap_file_with_bytesio():
-    """Test the create_basemap_file function using a BytesIO boundary object."""
-    boundary_bytesio = None
-    with open(boundary, "rb") as f:
-        boundary_bytesio = BytesIO(f.read())
-
-    create_basemap_file(
-        verbose=True,
-        boundary=boundary_bytesio,
-        outfile="outreachy.mbtiles",
-        zooms="12-15",
-        source="esri",
-    )
-
-
 def test_create_with_bbox_string():
     """Create a basemapper object using a bbox string"""
     hits = 0
@@ -125,8 +100,53 @@ def test_create_with_bbox_string():
     assert hits == 2
 
 
+def test_create_basemap_file_with_bytesio():
+    """test the create_basemap_file function using a bytesio boundary object."""
+    boundary_bytesio = None
+    with open(boundary, "rb") as f:
+        boundary_bytesio = BytesIO(f.read())
+
+    create_basemap_file(
+        verbose=True,
+        boundary=boundary_bytesio,
+        outfile=outfile,
+        zooms="12-15",
+        source="esri",
+    )
+
+
+def test_create_basemap_file_with_bbox_string():
+    """test the create_basemap_file function using a bbox string."""
+
+    create_basemap_file(
+        verbose=True,
+        boundary=bbox_string,
+        outfile=outfile,
+        zooms="12-15",
+        source="esri",
+    )
+
+
+def test_fails_with_boundary_path():
+    """Test that create_basemap_file object fails with boundary path initialization."""
+    res = False
+    try:
+        create_basemap_file(
+            verbose=True,
+            boundary=boundary,
+            outfile=outfile,
+            zooms="12-15",
+            source="esri",
+        )
+    except Exception as e: 
+         res = True
+    
+    assert res
+
 if __name__ == "__main__":
-    test_fails_with_boundary_path()
-    test_create_basemap_file_with_bytesio()
     test_create_with_boundary_bytesio()
     test_create_with_bbox_string()
+    test_create_basemap_file_with_bytesio()
+    test_create_basemap_file_with_bbox_string()
+
+    test_fails_with_boundary_path()

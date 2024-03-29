@@ -24,6 +24,7 @@ import concurrent.futures
 import logging
 import queue
 import re
+import os
 import sys
 import threading
 from io import BytesIO
@@ -278,13 +279,13 @@ class BaseMapper(object):
         """Make a bounding box from a shapely geometry.
 
         Args:
-            boundary (str | BytesIO ): A BBOX string or BytesIO-loaded GeoJSON file of the AOI.
+            boundary (str | BytesIO): A BBOX string or BytesIO-loaded GeoJSON file of the AOI.
                 The GeoJSON can contain multiple geometries.
 
         Returns:
             (list): The bounding box coordinates
         """
-        if not isinstance(boundary, BytesIO) and not boundary.lower().endswith((".json", ".geojson")):
+        if isinstance(boundary, str):
             # Is BBOX string
             try:
                 bbox_parts = boundary.split(",")
@@ -300,13 +301,12 @@ class BaseMapper(object):
                 log.error(f"Failed to parse BBOX string: {boundary}")
                 return
 
-        log.debug(f"Reading geojson file: {boundary}")
         poly = None
-        # If boundary given is BytesIO object
+
         if isinstance(boundary, BytesIO):
             poly = geojson.load(boundary)
         else:
-            raise ValueError("Only BBOX string or BytesIO-loaded GeoJSON file are allowed")
+            raise ValueError("Only BBOX string or BytesIO-loaded GeoJSON file are allowed.")
 
         if "features" in poly:
             geometry = shape(poly["features"][0]["geometry"])
@@ -559,17 +559,16 @@ def main():
         parser.print_help()
         quit()
 
-    boundary_bytesio = None
-    try:
-        with open(args.boundary, "rb") as f:
-            boundary_bytesio = BytesIO(f.read())
-    except FileNotFoundError:
-        log.error("Boundary file could not be loaded!")
-        quit()
+    if os.path.isfile(args.boundary):
+            with open(args.boundary, 'rb') as f:
+                boundary = BytesIO(f.read())
+    else:
+        log.info("Could not load boundary as file. Loading as string")
+        boundary = args.boundary # is bbox string        
 
     create_basemap_file(
         verbose=args.verbose,
-        boundary=boundary_bytesio,
+        boundary=boundary,
         tms=args.tms,
         xy=args.xy,
         outfile=args.outfile,
